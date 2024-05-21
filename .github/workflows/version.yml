@@ -16,6 +16,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install git
+        run: sudo apt-get install git
+
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
