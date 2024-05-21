@@ -1,0 +1,27 @@
+name: 'Publish to Pages'
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure Git Credentials
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@users.noreply.github.com
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - run: pip install mkdocs mkdocs-material
+
+      - run: mkdocs gh-deploy --force

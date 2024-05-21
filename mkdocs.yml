@@ -1,0 +1,6 @@
+site_name: Serv-C
+
+site_url: https://docs.servc.io
+
+theme:
+  name: material
