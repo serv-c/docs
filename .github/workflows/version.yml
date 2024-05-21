@@ -1,0 +1,53 @@
+name: 'Change Log'
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  generate-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'latest'
+
+      - name: Install lint
+        shell: bash
+        run: |
+          npm install -g @commitlint/cli @commitlint/config-conventional
+          if [ ! -f "commitlint.config.js" ]; then
+            echo "module.exports = {extends: ['@commitlint/config-conventional']}" > commitlint.config.js
+          fi
+
+      - name: Lint Commit Message
+        shell: bash
+        run: commitlint --from=HEAD~2 --verbose
+
+      - name: 'Get Previous tag'
+        id: previoustag
+        uses: 'WyriHaximus/github-action-get-previous-tag@v1'
+
+      - name: Conventional Changelog Action
+        id: changelog
+        if: github.ref_name == 'main'
+        uses: TriPSs/conventional-changelog-action@v3
+        with:
+          github-token: ${{ github.token }}
+          git-url: git.yusufali.ca
+          tag-prefix: ''
+          output-file: false
+          skip-version-file: true
+          skip-commit: true
+          skip-ci: false
+          skip-tag: ${{ github.ref_name != 'main' }}
+          fallback-version: ${{ steps.previoustag.outputs.tag }}
