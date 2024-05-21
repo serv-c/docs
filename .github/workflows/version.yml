@@ -46,7 +46,6 @@ jobs:
         uses: TriPSs/conventional-changelog-action@v3
         with:
           github-token: ${{ github.token }}
-          git-url: git.yusufali.ca
           tag-prefix: ''
           output-file: false
           skip-version-file: true
