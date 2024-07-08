@@ -1,8 +1,6 @@
 name: 'Change Log'
 on:
-  push:
-    branches:
-      - main
+  - push
 
 permissions:
   contents: write
