@@ -1,6 +1,38 @@
 site_name: Serv-C
 
+repo_name: serv-c/docs
+
 site_url: https://docs.servc.io
 
 theme:
   name: material
+  features:
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.preview
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.prune
+    - search.suggest
+    - search.highlight
+    - navigation.top
+
+plugins:
+  - optimize
+  - search
+
+extra:
+  generator: false
+
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.details
+  - pymdownx.smartsymbols
+  - pymdownx.snippets
+  - tables
+  - toc:
+      permalink: true
