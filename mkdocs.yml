@@ -8,6 +8,12 @@ nav:
   - Home: index.md
   # - Frontend:
   #   - Client: frontend/client.md
+  - Services:
+      - services/index.md
+      - Worker: services/worker.md
+      - Middleware: services/middleware.md
+  - Configs:
+      - config/index.md
 
 theme:
   name: material
@@ -16,11 +22,13 @@ theme:
     - navigation.instant.prefetch
     - navigation.instant.preview
     - navigation.tracking
+    - navigation.indexes
     - navigation.tabs
+    - navigation.top
     - navigation.prune
     - search.suggest
     - search.highlight
-    - navigation.top
+    - toc.follow
 
 plugins:
   - search

@@ -1,0 +1,35 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://docs.servc.io/schema/response.schema.json",
+    "title": "Response",
+    "description": "The response from a microservice",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "The unique identifier of the response"
+      },
+      "progress": {
+        "type": "number",
+        "description": "The progress of the response",
+        "minimum": 0,
+        "maximum": 100
+      },
+      "statusCode": {
+        "type": "number",
+        "description": "The status code of the response",
+        "minimum": 100,
+        "maximum": 599
+      },
+      "isError": {
+        "type": "boolean",
+        "description": "if false, the response is an error"
+      },
+      "responseBody": {
+        "type": "object",
+        "description": "The response body of the response"
+      }
+    },
+    "required": [ "id", "progress", "statusCode", "isError", "responseBody" ]
+  }
+  
