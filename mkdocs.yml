@@ -8,6 +8,8 @@ nav:
   - Home: index.md
   # - Frontend:
   #   - Client: frontend/client.md
+  - Services:
+      - services/index.md
 
 theme:
   name: material
@@ -16,11 +18,13 @@ theme:
     - navigation.instant.prefetch
     - navigation.instant.preview
     - navigation.tracking
+    - navigation.indexes
     - navigation.tabs
+    - navigation.top
     - navigation.prune
     - search.suggest
     - search.highlight
-    - navigation.top
+    - toc.follow
 
 plugins:
   - search
