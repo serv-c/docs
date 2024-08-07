@@ -1,0 +1,38 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://docs.servc.io/schema/payload.schema.json",
+    "title": "Payload",
+    "description": "The payload passed to a microservice",
+    "type": "object",
+    "properties": {
+      "type": {
+        "description": "The type of payload. only 'input' and 'event' are supported",
+        "type": "string",
+        "enum": ["input", "event"]
+      },
+      "id": {
+        "description": "The id of the payload. This will also serve as the location in the cache to look for the result from the microservice",
+        "type": "string"
+      },
+      "route": {
+        "description": "The route to the service to send the payload",
+        "type": "string"
+      },
+      "argumentId": {
+        "description": "The id of the argument to pass to the service. This id references the location in cache that the argument object is stored",
+        "type": "string"
+      },
+      "instanceId": {
+        "description": "the id of the microservice service instance to process the payload. This is used to force a specific microservice instance to process the payload",
+        "type": "string"
+      },
+      "argument": {
+        "$ref": "https://docs.servc.io/schema/argument.schema.json"
+      },
+      "force": {
+        "description": "Force the message to be sent in the bus even if a response exists in the cache",
+        "type": "boolean"
+      }
+    },
+    "required": ["type", "route", "force"]
+}
