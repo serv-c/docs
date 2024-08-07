@@ -1,0 +1,15 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://docs.servc.io/schema/middleware-bus-onconsuming.schema.json",
+    "title": "Middleware Bus OnConsuming",
+    "description": "The method called when the bus is listening to a queue",
+    "type": "object",
+    "properties": {
+      "route": {
+        "type": "string",
+        "description": "the route the service is bound. This will include the prefix."
+      }
+    },
+    "required": [ "route" ]
+  }
+  

@@ -6,7 +6,7 @@ Serv-c is an opinionated framework and prescribes a pattern for cloud-native tec
 
 Frontend
 
-Services
+[Services](services/index.md)
 
 Database
 

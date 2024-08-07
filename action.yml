@@ -1,0 +1,63 @@
+name: 'servc'
+description: Tests a service library against the servc spec
+
+inputs:
+  dockerfile:
+    description: 'The dockerfile location'
+    required: true
+    default: 'Dockerfile'
+  context:
+    description: 'The context to build'
+    required: true
+    default: '.'
+  suite:
+    description: 'The test suite to run'
+    required: true
+    default: ''
+
+runs:
+  using: 'composite'
+
+  services:
+    rabbitmq:
+      image: rabbitmq:3
+      env:
+        RABBITMQ_DEFAULT_USER: guest
+        RABBITMQ_DEFAULT_PASS: guest
+      ports:
+        - 5672/tcp
+
+    redis:
+      image: redis
+      options: >-
+        --health-cmd "redis-cli ping"
+        --health-interval 10s
+        --health-timeout 5s
+        --health-retries 5          
+      ports:
+        - 6379/tcp
+
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Test Build
+      uses: docker/build-push-action@v5
+      with:
+        context: ${{ inputs.context }}
+        file: ${{ inputs.dockerfile }}
+        push: false
+        tags: servc:latest
+
+    - uses: actions/setup-python@v5
+
+    - run: pip install -r requirements.test.txt
+
+    - name: Run tests
+      env:
+        CACHE_URL: redis://redis
+        BUS_URL: amqp://guest:guest@rabbitmq
+      run: python -m unittest tests/${{ inputs.suite }}/**/*.py

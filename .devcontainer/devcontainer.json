@@ -1,0 +1,13 @@
+{
+  "service": "mkdocs",
+  "workspaceFolder": "/workspace",
+  "dockerComposeFile": "../docker-compose.yml",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "GitHub.copilot",
+        "ms-python.python"
+      ]
+    }
+  }
+}
