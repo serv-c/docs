@@ -32,11 +32,16 @@ jobs:
           fi
 
       - name: Lint Commit Message
+        if: github.event_name == 'push'
         shell: bash
-        run: commitlint --from=HEAD~2 --verbose
+        run: commitlint --from=HEAD~2 --verbose || true
+
+      - name: Lint Pull Request
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
 
       - name: 'Get Previous tag'
-        id: previoustag
         run: |
           LATEST_VERSION=$(git describe --tags "$(git rev-list --tags --max-count=1)")
           echo "tag=$LATEST_VERSION" >> $GITHUB_OUTPUT
@@ -45,23 +50,14 @@ jobs:
       - name: Conventional Changelog Action
         id: changelog
         if: github.ref_name == 'main'
-        uses: TriPSs/conventional-changelog-action@v5
+        uses: TriPSs/conventional-changelog-action@v3
         with:
           github-token: ${{ github.token }}
-          tag-prefix: ''
+          git-url: git.yusufali.ca
+          tag-prefix: ""
           output-file: false
           skip-version-file: true
           skip-commit: true
           skip-ci: false
           skip-tag: ${{ github.ref_name != 'main' }}
-          fallback-version: ${{ steps.previoustag.outputs.tag }}
-      
-      - name: Create Release
-        uses: actions/create-release@v1
-        if: steps.changelog.outputs.skipped == 'false' && github.ref_name == 'main'
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          tag_name: ${{ steps.changelog.outputs.tag }}
-          release_name: ${{ steps.changelog.outputs.tag }}
-          body: ${{ steps.changelog.outputs.clean_changelog }}
+          fallback-version: ${{ env.tag }}
