@@ -46,6 +46,7 @@ runs:
         file: ${{ inputs.dockerfile }}
         push: false
         tags: servc:latest
+        load: true
 
     - uses: actions/setup-python@v5
 
