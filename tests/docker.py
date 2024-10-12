@@ -1,4 +1,5 @@
 import os
+import random
 import time
 
 import docker
@@ -61,18 +62,24 @@ def launch_services():
     client.images.pull("rabbitmq:3")
     client.images.pull("redis")
 
+    rabbitmq_port = random.randint(5000, 8000)
     rabbitmq = launch_container(
         image="rabbitmq:3",
         environment={
             "RABBITMQ_DEFAULT_USER": "rabbitmq",
             "RABBITMQ_DEFAULT_PASS": "rabbitmq",
         },
+        ports={"5672/tcp": rabbitmq_port},
     )
-    redis = launch_container(image="redis")
+
+    redis_port = random.randint(9000, 11000)
+    redis = launch_container(image="redis", ports={"6379/tcp": redis_port})
 
     environment = {
         "CACHE_URL": f"redis://{redis.name}:6379/0",
         "BUS_URL": f"amqp://rabbitmq:rabbitmq@{rabbitmq.name}",
+        "CACHE_URL_LOCAL": f"redis://localhost:{redis_port}/0",
+        "BUS_URL_LOCAL": f"amqp://rabbitmq:rabbitmq@localhost:{rabbitmq_port}",
     }
 
     return environment, (rabbitmq, redis)

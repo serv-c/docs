@@ -40,7 +40,7 @@ class TestServicePrefixes(unittest.TestCase):
             }
         )
 
-        params = pika.URLParameters(self.environment["BUS_URL"])
+        params = pika.URLParameters(self.environment["BUS_URL_LOCAL"])
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
 
@@ -61,7 +61,7 @@ class TestServicePrefixes(unittest.TestCase):
         prefix = "test_prefix"
         queue = prefix + self.route
 
-        params = pika.URLParameters(self.environment["BUS_URL"])
+        params = pika.URLParameters(self.environment["BUS_URL_LOCAL"])
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
         channel.queue_declare(queue=queue, durable=True, exclusive=False)
@@ -98,7 +98,7 @@ class TestServicePrefixes(unittest.TestCase):
             "route2": "prefix2",
         }
 
-        params = pika.URLParameters(self.environment["BUS_URL"])
+        params = pika.URLParameters(self.environment["BUS_URL_LOCAL"])
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
         for route, prefix in routePrefix.items():

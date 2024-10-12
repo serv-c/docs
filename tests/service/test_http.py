@@ -25,7 +25,7 @@ class TestServiceHTTP(unittest.TestCase):
             cls.container = None
 
     def test_send_payload_to_queue(self):
-        params = pika.URLParameters(self.environment["BUS_URL"])
+        params = pika.URLParameters(self.environment["BUS_URL_LOCAL"])
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
         channel.queue_declare(queue=self.queue_name, durable=True, exclusive=False)
