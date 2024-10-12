@@ -39,8 +39,13 @@ runs:
           config/.placeholder
 
     - name: Build Docker Image
-      shell: bash
-      run: docker build {{ inputs.context }} -f {{ inputs.dockerfile }} -t servc:latest
+      uses: docker/build-push-action@v5
+      with:
+        context: ${{ inputs.context }}
+        file: ${{ inputs.dockerfile }}
+        push: false
+        tags: servc:latest
+        load: true
 
     - run: pip install -r requirements.test.txt
       shell: bash
