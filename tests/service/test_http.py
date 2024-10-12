@@ -4,7 +4,7 @@ import uuid
 import pika
 import requests
 
-from tests.docker import ENVIRONMENT, stop_container
+from tests.docker import launch_services, stop_container
 from tests.service.test_config_http import simple_start
 
 
@@ -13,16 +13,19 @@ class TestServiceHTTP(unittest.TestCase):
     def setUpClass(cls):
         cls.queue_name = str(uuid.uuid4())
         cls.route = str(uuid.uuid4())
-        cls.container = simple_start(env={"CONF__BUS__QUEUE": cls.route})
+        cls.environment, cls.services = launch_services()
+        cls.container = simple_start({**cls.environment, "CONF__BUS__QUEUE": cls.route})
 
     @classmethod
     def tearDownClass(cls):
+        for service in cls.services:
+            stop_container(service)
         if cls.container is not None:
             stop_container(cls.container)
             cls.container = None
 
     def test_send_payload_to_queue(self):
-        params = pika.URLParameters(ENVIRONMENT["BUS_URL"])
+        params = pika.URLParameters(self.environment["BUS_URL"])
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
         channel.queue_declare(queue=self.queue_name, durable=True, exclusive=False)

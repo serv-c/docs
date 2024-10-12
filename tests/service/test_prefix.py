@@ -5,7 +5,7 @@ import uuid
 import pika
 import requests
 
-from tests.docker import ENVIRONMENT, stop_container
+from tests.docker import launch_services, stop_container
 from tests.service.test_config_http import simple_start
 
 
@@ -13,9 +13,12 @@ class TestServicePrefixes(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.container = None
+        cls.environment, cls.services = launch_services()
 
     @classmethod
     def tearDownClass(cls):
+        for service in cls.services:
+            stop_container(service)
         if cls.container is not None:
             stop_container(cls.container)
             cls.container = None
@@ -30,10 +33,14 @@ class TestServicePrefixes(unittest.TestCase):
 
     def test_simple_bind_prefix(self):
         self.container = simple_start(
-            env={"CONF__BUS__QUEUE": self.route, "CONF__BUS__PREFIX": "test-prefix"}
+            {
+                **self.environment,
+                "CONF__BUS__QUEUE": self.route,
+                "CONF__BUS__PREFIX": "test-prefix",
+            }
         )
 
-        params = pika.URLParameters(ENVIRONMENT["BUS_URL"])
+        params = pika.URLParameters(self.environment["BUS_URL"])
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
 
@@ -54,12 +61,14 @@ class TestServicePrefixes(unittest.TestCase):
         prefix = "test_prefix"
         queue = prefix + self.route
 
-        params = pika.URLParameters(ENVIRONMENT["BUS_URL"])
+        params = pika.URLParameters(self.environment["BUS_URL"])
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
         channel.queue_declare(queue=queue, durable=True, exclusive=False)
 
-        self.container = simple_start(env={"CONF__BUS__SENDPREFIX": prefix})
+        self.container = simple_start(
+            {**self.environment, "CONF__BUS__SENDPREFIX": prefix}
+        )
 
         response = requests.post(
             "http://localhost:3000",
@@ -89,14 +98,15 @@ class TestServicePrefixes(unittest.TestCase):
             "route2": "prefix2",
         }
 
-        params = pika.URLParameters(ENVIRONMENT["BUS_URL"])
+        params = pika.URLParameters(self.environment["BUS_URL"])
         connection = pika.BlockingConnection(params)
         channel = connection.channel()
         for route, prefix in routePrefix.items():
             channel.queue_declare(queue=prefix + route, durable=True, exclusive=False)
             channel.queue_declare(queue=route, durable=True, exclusive=False)
         self.container = simple_start(
-            env={
+            {
+                **self.environment,
                 "CONF__BUS__ROUTEPREFIX": json.dumps(routePrefix),
             }
         )

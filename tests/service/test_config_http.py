@@ -3,21 +3,19 @@ import unittest
 import requests
 
 from tests.docker import (
-    ENVIRONMENT,
-    LINKS,
     get_container_success,
     get_root_path,
     launch_container,
+    launch_services,
     stop_container,
 )
 
 
-def simple_start(env={}):
+def simple_start(env):
     with open(f"{get_root_path()}/config/config.yaml", "w+") as f:
         f.write("")
     container = launch_container(
-        environment={**ENVIRONMENT, **env},
-        links=LINKS,
+        environment=env,
         ports={"3000/tcp": 3000},
     )
     return container
@@ -26,10 +24,13 @@ def simple_start(env={}):
 class TestConfigHTTP(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.container = simple_start()
+        cls.environment, cls.services = launch_services()
+        cls.container = simple_start(cls.environment)
 
     @classmethod
     def tearDownClass(cls):
+        for service in cls.services:
+            stop_container(service)
         if cls.container is not None:
             stop_container(cls.container)
             cls.container = None
@@ -77,8 +78,7 @@ http:
             )
 
         container = launch_container(
-            environment=ENVIRONMENT,
-            links=LINKS,
+            environment=self.environment,
             ports={"8000/tcp": 8000},
         )
         self.assertTrue(get_container_success(container))
