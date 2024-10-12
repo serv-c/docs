@@ -4,19 +4,19 @@ description: Tests a service library against the servc spec
 inputs:
   dockerfile:
     description: 'The dockerfile location'
-    required: true
+    required: false
     default: 'Dockerfile'
   context:
     description: 'The context to build'
-    required: true
+    required: false
     default: '.'
   suite:
     description: 'The test suite to run'
-    required: true
+    required: false
     default: ''
   version:
     description: 'The version of the servc spec to test against'
-    required: true
+    required: false
     default: 'main'
 
 runs:
