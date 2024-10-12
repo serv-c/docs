@@ -1,4 +1,4 @@
-name: 'servc'
+name: 'servc spec test'
 description: Tests a service library against the servc spec
 
 inputs:
