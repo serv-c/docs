@@ -22,25 +22,6 @@ inputs:
 runs:
   using: 'composite'
 
-  services:
-    rabbitmq:
-      image: rabbitmq:3
-      env:
-        RABBITMQ_DEFAULT_USER: guest
-        RABBITMQ_DEFAULT_PASS: guest
-      ports:
-        - 5672/tcp
-
-    redis:
-      image: redis
-      options: >-
-        --health-cmd "redis-cli ping"
-        --health-interval 10s
-        --health-timeout 5s
-        --health-retries 5          
-      ports:
-        - 6379/tcp
-
   steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -68,9 +49,11 @@ runs:
     - uses: actions/setup-python@v5
 
     - run: pip install -r requirements.test.txt
+      shell: bash
       working-directory: servc-docs
 
     - name: Run tests
+      shell: bash
       working-directory: servc-docs
       env:
         CACHE_URL: redis://redis
