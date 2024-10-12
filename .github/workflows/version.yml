@@ -53,7 +53,7 @@ jobs:
         uses: TriPSs/conventional-changelog-action@v3
         with:
           github-token: ${{ github.token }}
-          git-url: git.yusufali.ca
+          git-url: ${{ gitea.workspace != '' && 'git.yusufali.ca' || 'github.com' }}
           tag-prefix: ""
           output-file: false
           skip-version-file: true
