@@ -26,6 +26,8 @@ runs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - uses: actions/setup-python@v5
+
     - uses: actions/checkout@v4
       with:
         repository: serv-c/docs
@@ -36,19 +38,9 @@ runs:
           requirements.test.txt
           config/.placeholder
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-    
-    - name: Test Build
-      uses: docker/build-push-action@v5
-      with:
-        context: ${{ inputs.context }}
-        file: ${{ inputs.dockerfile }}
-        push: false
-        tags: servc:latest
-        load: true
-
-    - uses: actions/setup-python@v5
+    - name: Build Docker Image
+      shell: bash
+      run: docker build {{ inputs.context }} -f {{ inputs.dockerfile }} -t servc:latest
 
     - run: pip install -r requirements.test.txt
       shell: bash
@@ -57,7 +49,4 @@ runs:
     - name: Run tests
       shell: bash
       working-directory: servc-docs
-      env:
-        CACHE_URL: redis://redis
-        BUS_URL: amqp://guest:guest@rabbitmq
       run: python -m unittest tests/${{ inputs.suite }}/**/*.py
