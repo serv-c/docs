@@ -10,13 +10,13 @@ from tests.docker import (
 
 
 class TestConfig(unittest.TestCase):
+    @classmethod
     def setUpClass(cls):
-        cls.environment, cls.services = launch_services()
+        cls.environment, cls.network, cls.services = launch_services()
 
     @classmethod
     def tearDownClass(cls):
-        for service in cls.services:
-            stop_container(service)
+        stop_container(cls.network, cls.services)
 
     def test_misconfigured_config_file_location(self):
         with open(f"{get_root_path()}/config/config.test.yaml", "w+") as f:
@@ -28,10 +28,11 @@ conf:
             )
 
         container = launch_container(
+            network=self.network,
             environment={"CONF__FILE": "/config/config.test.yaml", **self.environment},
         )
         self.assertFalse(get_container_success(container))
-        stop_container(container)
+        stop_container(self.network, container)
 
     def test_config_file_location(self):
         with open(f"{get_root_path()}/config/config.test.yaml", "w+") as f:
@@ -43,10 +44,11 @@ conf:
             )
 
         container = launch_container(
+            network=self.network,
             environment={"CONF__FILE": "/config/config.test.yaml", **self.environment},
         )
         self.assertTrue(get_container_success(container))
-        stop_container(container)
+        stop_container(self.network, container)
 
     def test_only_config_file_location(self):
         with open(f"{get_root_path()}/config/config.yaml", "w+") as f:
@@ -63,12 +65,13 @@ bus:
             )
 
         container = launch_container(
+            network=self.network,
             environment={
                 "CONF__FILE": "/config/config.yaml",
             },
         )
         self.assertTrue(get_container_success(container))
-        stop_container(container)
+        stop_container(self.network, container)
 
     def test_config_environment_variable(self):
         with open(f"{get_root_path()}/config/config.yaml", "w+") as f:
@@ -83,10 +86,11 @@ cache:
             )
 
         container = launch_container(
+            network=self.network,
             environment={"CONF__FILE": "/config/config.test.yaml", **self.environment},
         )
         self.assertTrue(get_container_success(container))
-        stop_container(container)
+        stop_container(self.network, container)
 
 
 if __name__ == "__main__":

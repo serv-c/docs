@@ -12,25 +12,6 @@ jobs:
   servc:
     runs-on: ubuntu-latest
 
-    services:
-      rabbitmq:
-        image: rabbitmq:3
-        env:
-          RABBITMQ_DEFAULT_USER: guest
-          RABBITMQ_DEFAULT_PASS: guest
-        ports:
-          - 5672/tcp
-
-      redis:
-        image: redis
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5                    
-        ports:
-          - 6379/tcp
-
     steps:
       - name: Run Servc Tests
         uses: serv-c/docs@main

@@ -6,30 +6,31 @@ import pika
 import requests
 
 from tests.docker import launch_services, stop_container
-from tests.service.test_config_http import simple_start
+from tests.service import simple_start
 
 
 class TestServicePrefixes(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls.environment, cls.network, cls.services = launch_services(True)
         cls.container = None
-        cls.environment, cls.services = launch_services()
+
+        params = pika.URLParameters(cls.environment["BUS_URL_LOCAL"])
+        cls.conn = pika.BlockingConnection(params)
 
     @classmethod
     def tearDownClass(cls):
-        for service in cls.services:
-            stop_container(service)
-        if cls.container is not None:
-            stop_container(cls.container)
-            cls.container = None
+        stop_container(cls.network, (*cls.services, cls.container))
+        cls.conn.close()
 
     def setUp(self):
         self.route = str(uuid.uuid4())
+        self.channel = self.conn.channel()
 
     def tearDown(self):
-        if self.container is not None:
-            stop_container(self.container)
-            self.container = None
+        stop_container(self.network, self.container)
+        self.container = None
+        self.channel.close()
 
     def test_simple_bind_prefix(self):
         self.container = simple_start(
@@ -37,15 +38,12 @@ class TestServicePrefixes(unittest.TestCase):
                 **self.environment,
                 "CONF__BUS__QUEUE": self.route,
                 "CONF__BUS__PREFIX": "test-prefix",
-            }
+            },
+            self.network,
         )
 
-        params = pika.URLParameters(self.environment["BUS_URL_LOCAL"])
-        connection = pika.BlockingConnection(params)
-        channel = connection.channel()
-
         try:
-            channel.queue_declare(
+            self.channel.queue_declare(
                 queue="test-prefix" + self.route,
                 passive=True,
                 durable=True,
@@ -54,20 +52,16 @@ class TestServicePrefixes(unittest.TestCase):
         except Exception as e:
             print(e)
             raise Exception("Queue not found")
-        finally:
-            connection.close()
 
     def test_send_w_prefix(self):
         prefix = "test_prefix"
         queue = prefix + self.route
 
-        params = pika.URLParameters(self.environment["BUS_URL_LOCAL"])
-        connection = pika.BlockingConnection(params)
-        channel = connection.channel()
-        channel.queue_declare(queue=queue, durable=True, exclusive=False)
+        self.channel.queue_declare(queue=queue, durable=True, exclusive=False)
 
         self.container = simple_start(
-            {**self.environment, "CONF__BUS__SENDPREFIX": prefix}
+            {**self.environment, "CONF__BUS__SENDPREFIX": prefix},
+            self.network,
         )
 
         response = requests.post(
@@ -86,11 +80,10 @@ class TestServicePrefixes(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-        queue = channel.queue_declare(
+        queue = self.channel.queue_declare(
             queue=queue, passive=True, durable=True, exclusive=False
         )
         self.assertEqual(queue.method.message_count, 1)
-        connection.close()
 
     def test_send_many_prefix(self):
         routePrefix = {
@@ -98,17 +91,17 @@ class TestServicePrefixes(unittest.TestCase):
             "route2": "prefix2",
         }
 
-        params = pika.URLParameters(self.environment["BUS_URL_LOCAL"])
-        connection = pika.BlockingConnection(params)
-        channel = connection.channel()
         for route, prefix in routePrefix.items():
-            channel.queue_declare(queue=prefix + route, durable=True, exclusive=False)
-            channel.queue_declare(queue=route, durable=True, exclusive=False)
+            self.channel.queue_declare(
+                queue=prefix + route, durable=True, exclusive=False
+            )
+            self.channel.queue_declare(queue=route, durable=True, exclusive=False)
         self.container = simple_start(
             {
                 **self.environment,
                 "CONF__BUS__ROUTEPREFIX": json.dumps(routePrefix),
-            }
+            },
+            self.network,
         )
 
         for route, prefix in routePrefix.items():
@@ -129,8 +122,7 @@ class TestServicePrefixes(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 200)
 
-            queue = channel.queue_declare(
+            queue = self.channel.queue_declare(
                 queue=newRoute, passive=True, durable=True, exclusive=False
             )
             self.assertEqual(queue.method.message_count, 1)
-        connection.close()

@@ -9,43 +9,21 @@ from tests.docker import (
     launch_services,
     stop_container,
 )
-
-
-def simple_start(env):
-    with open(f"{get_root_path()}/config/config.yaml", "w+") as f:
-        f.write("")
-    container = launch_container(
-        environment=env,
-        ports={"3000/tcp": 3000},
-    )
-    return container
+from tests.service import simple_start
 
 
 class TestConfigHTTP(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.environment, cls.services = launch_services()
-        cls.container = simple_start(cls.environment)
+        cls.environment, cls.network, cls.services = launch_services()
+        cls.container = simple_start(cls.environment, cls.network)
 
     @classmethod
     def tearDownClass(cls):
-        for service in cls.services:
-            stop_container(service)
-        if cls.container is not None:
-            stop_container(cls.container)
-            cls.container = None
-
-    # def setUp(self):
-    #     cwd = os.getcwd()
-    #     os.chdir("sample_data")
-    #     call(["python3", "load_existing.py"], stdout=PIPE, stderr=PIPE)
-    #     os.chdir(cwd)
+        stop_container(cls.network, (*cls.services, cls.container))
+        cls.container = None
 
     def test_send_payload_no_id(self):
-        # params = pika.URLParameters(ENVIRONMENT["BUS_URL"])
-        # connection = pika.BlockingConnection(params)
-        # channel = connection.channel()
-        # connection.close()
         response = requests.post(
             "http://localhost:3000",
             json={
@@ -66,7 +44,7 @@ class TestConfigHTTP(unittest.TestCase):
 
     def test_port(self):
         if self.container is not None:
-            stop_container(self.container)
+            stop_container(self.network, self.container)
         with open(f"{get_root_path()}/config/config.yaml", "w+") as f:
             f.write(
                 """
@@ -80,15 +58,16 @@ http:
         container = launch_container(
             environment=self.environment,
             ports={"8000/tcp": 8000},
+            network=self.network,
         )
         self.assertTrue(get_container_success(container))
 
         self.assertEqual(
             requests.get("http://localhost:8000", timeout=2.5).status_code, 200
         )
-        stop_container(container)
+        stop_container(self.network, container)
         self.container = None
-        simple_start()
+        simple_start(self.environment, self.network)
 
 
 if __name__ == "__main__":
