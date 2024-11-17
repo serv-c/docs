@@ -20,8 +20,8 @@ class TestServicePrefixes(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        stop_container(cls.network, (*cls.services, cls.container))
         cls.conn.close()
+        stop_container(cls.network, (*cls.services, cls.container))
 
     def setUp(self):
         self.route = str(uuid.uuid4())
@@ -48,6 +48,7 @@ class TestServicePrefixes(unittest.TestCase):
                 passive=True,
                 durable=True,
                 exclusive=False,
+                auto_delete=False,
             )
         except Exception as e:
             print(e)
@@ -57,10 +58,12 @@ class TestServicePrefixes(unittest.TestCase):
         prefix = "test_prefix"
         queue = prefix + self.route
 
-        self.channel.queue_declare(queue=queue, durable=True, exclusive=False)
+        self.channel.queue_declare(
+            queue=queue, durable=True, exclusive=False, auto_delete=False
+        )
 
         self.container = simple_start(
-            {**self.environment, "CONF__BUS__SENDPREFIX": prefix},
+            {**self.environment, "CONF__BUS__PREFIX": prefix},
             self.network,
         )
 
@@ -81,7 +84,7 @@ class TestServicePrefixes(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         queue = self.channel.queue_declare(
-            queue=queue, passive=True, durable=True, exclusive=False
+            queue=queue, passive=True, durable=True, exclusive=False, auto_delete=False
         )
         self.assertEqual(queue.method.message_count, 1)
 
@@ -91,21 +94,22 @@ class TestServicePrefixes(unittest.TestCase):
             "route2": "prefix2",
         }
 
-        for route, prefix in routePrefix.items():
+        for route, newRoute in routePrefix.items():
             self.channel.queue_declare(
-                queue=prefix + route, durable=True, exclusive=False
+                queue=newRoute, durable=True, exclusive=False, auto_delete=False
             )
-            self.channel.queue_declare(queue=route, durable=True, exclusive=False)
+            self.channel.queue_declare(
+                queue=route, durable=True, exclusive=False, auto_delete=False
+            )
         self.container = simple_start(
             {
                 **self.environment,
-                "CONF__BUS__ROUTEPREFIX": json.dumps(routePrefix),
+                "CONF__BUS__ROUTEMAP": json.dumps(routePrefix),
             },
             self.network,
         )
 
-        for route, prefix in routePrefix.items():
-            newRoute = prefix + route
+        for route, newRoute in routePrefix.items():
             response = requests.post(
                 "http://localhost:3000",
                 json={
@@ -123,6 +127,10 @@ class TestServicePrefixes(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
 
             queue = self.channel.queue_declare(
-                queue=newRoute, passive=True, durable=True, exclusive=False
+                queue=newRoute,
+                passive=True,
+                durable=True,
+                exclusive=False,
+                auto_delete=False,
             )
             self.assertEqual(queue.method.message_count, 1)

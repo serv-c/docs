@@ -29,7 +29,8 @@ conf:
 
         container = launch_container(
             network=self.network,
-            environment={"CONF__FILE": "/config/config.test.yaml", **self.environment},
+            environment={"CONF__FILE": "/config/config.test.yaml",
+                         **self.environment},
         )
         self.assertFalse(get_container_success(container))
         stop_container(self.network, container)
@@ -45,7 +46,8 @@ conf:
 
         container = launch_container(
             network=self.network,
-            environment={"CONF__FILE": "/config/config.test.yaml", **self.environment},
+            environment={"CONF__FILE": "/config/config.test.yaml",
+                         **self.environment},
         )
         self.assertTrue(get_container_success(container))
         stop_container(self.network, container)
@@ -55,12 +57,12 @@ conf:
             f.write(
                 f"""
 conf:
-  file: /config/config.test.yaml
+  file: /config/config.yaml
 
-cache:
-  url: {self.environment["CACHE_URL"]}
-bus:
-  url: {self.environment["BUS_URL"]}
+  cache:
+    url: {self.environment["CACHE_URL"]}
+  bus:
+    url: {self.environment["BUS_URL"]}
             """
             )
 
@@ -80,14 +82,15 @@ bus:
 conf:
   file: /config/config.yaml
 
-cache:
-  url: asasds
+  cache:
+    url: asasds
             """
             )
 
         container = launch_container(
             network=self.network,
-            environment={"CONF__FILE": "/config/config.test.yaml", **self.environment},
+            environment={
+                "CONF__CACHE__URL": self.environment["CACHE_URL"], **self.environment},
         )
         self.assertTrue(get_container_success(container))
         stop_container(self.network, container)

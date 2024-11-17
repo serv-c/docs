@@ -57,14 +57,20 @@ def get_container_success(container):
 
 def stop_container(network, container):
     if container is not None:
-        if isinstance(container, list):
+        if isinstance(container, list) or isinstance(container, tuple):
             for c in container:
                 stop_container(network, c)
             network.remove()
             return
-        network.disconnect(container)
-        container.stop()
-        container.remove()
+        try:
+            network.disconnect(container)
+        except:
+            pass
+        try:
+            container.stop()
+            container.remove()
+        except:
+            pass
 
 
 def launch_services(expose_ports=False):
@@ -76,9 +82,14 @@ def launch_services(expose_ports=False):
     network = client.networks.create(network_name, driver="bridge")
 
     rabbitmq_port = random.randint(5000, 8000)
-    rabbitmq_ports = {"5672/tcp": rabbitmq_port} if expose_ports else None
+    rabbimtq_management_port = random.randint(11000, 15000)
+    rabbitmq_ports = (
+        {"5672/tcp": rabbitmq_port, "15672/tcp": rabbimtq_management_port}
+        if expose_ports
+        else None
+    )
     rabbitmq = launch_container(
-        image="rabbitmq:3",
+        image="rabbitmq:3-management",
         environment={
             "RABBITMQ_DEFAULT_USER": "rabbitmq",
             "RABBITMQ_DEFAULT_PASS": "rabbitmq",

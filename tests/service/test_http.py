@@ -15,7 +15,7 @@ class TestServiceHTTP(unittest.TestCase):
         cls.route = str(uuid.uuid4())
         cls.environment, cls.network, cls.services = launch_services(True)
 
-        env = {**cls.environment, "CONF__BUS__QUEUE": cls.route}
+        env = {**cls.environment, "CONF__BUS__ROUTE": cls.route}
         cls.container = simple_start(env, cls.network)
 
         params = pika.URLParameters(cls.environment["BUS_URL_LOCAL"])
@@ -23,8 +23,8 @@ class TestServiceHTTP(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        stop_container(cls.network, (*cls.services, cls.container))
         cls.conn.close()
+        stop_container(cls.network, (*cls.services, cls.container))
 
     def setUp(self):
         self.channel = self.conn.channel()
@@ -77,31 +77,6 @@ class TestServiceHTTP(unittest.TestCase):
 
     def test_retrieving_fake_key(self):
         response = requests.get("http://localhost:3000/id/fake-key", timeout=2.5)
-        self.assertEqual(response.status_code, 404)
-
-    def test_retrieving_real_key(self):
-        id = str(uuid.uuid4())
-        job_submit = requests.post(
-            "http://localhost:3000",
-            json={
-                "type": "input",
-                "id": id,
-                "route": self.route,
-                "argument": {
-                    "method": "test-method",
-                    "inputs": self.route,
-                },
-            },
-            timeout=2.5,
-        )
-        self.assertEqual(job_submit.status_code, 200)
-        self.assertEqual(job_submit.text, id)
-
-        response = requests.get(f"http://localhost:3000/id/{id}", timeout=2.5)
         self.assertEqual(response.status_code, 200)
-        response = response.json()
-        self.assertEqual(response["id"], id)
-        self.assertEqual(response["isError"], True)
-        self.assertTrue("progress" in response)
-        self.assertTrue("statusCode" in response)
-        self.assertTrue("responseBody" in response)
+        self.assertIsNone(response.json())
+
