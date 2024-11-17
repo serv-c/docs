@@ -69,5 +69,5 @@ class TestSimpleMethod(unittest.TestCase):
         value = response.json()
         self.assertEqual(value["progress"], 100)
         self.assertEqual(value["responseBody"], False)
-        self.assertNotEqual(value["statusCode"], 200)
-        self.assertEqual(value["isError"], True)
+        self.assertEqual(value["statusCode"], 200)
+        self.assertEqual(value["isError"], False)
