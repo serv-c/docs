@@ -1,10 +1,12 @@
+import os
 import unittest
 import uuid
+import random
 
 import pika
 import requests
 
-from tests.docker import launch_services, stop_container
+from tests.launch import stop
 from tests.service import simple_start
 
 
@@ -13,18 +15,19 @@ class TestServiceHTTP(unittest.TestCase):
     def setUpClass(cls):
         cls.queue_name = str(uuid.uuid4())
         cls.route = str(uuid.uuid4())
-        cls.environment, cls.network, cls.services = launch_services(True)
+        cls.port = random.randint(3000, 4000)
+        env = {"CONF__BUS__ROUTE": cls.route, "CONF__HTTP__PORT": cls.port}
+        cls.container = simple_start(env)
 
-        env = {**cls.environment, "CONF__BUS__ROUTE": cls.route}
-        cls.container = simple_start(env, cls.network)
-
-        params = pika.URLParameters(cls.environment["BUS_URL_LOCAL"])
+        params = pika.URLParameters(os.environ["BUS_URL"])
         cls.conn = pika.BlockingConnection(params)
 
     @classmethod
     def tearDownClass(cls):
+        channel = cls.conn.channel()
+        channel.queue_delete(queue=cls.route)
         cls.conn.close()
-        stop_container(cls.network, (*cls.services, cls.container))
+        stop(cls.container)
 
     def setUp(self):
         self.channel = self.conn.channel()
@@ -33,10 +36,11 @@ class TestServiceHTTP(unittest.TestCase):
         self.channel.close()
 
     def test_send_payload_to_queue(self):
-        self.channel.queue_declare(queue=self.queue_name, durable=True, exclusive=False)
+        self.channel.queue_declare(
+            queue=self.queue_name, durable=True, exclusive=False)
 
         response = requests.post(
-            "http://localhost:3000",
+            f"http://localhost:{self.port}",
             json={
                 "type": "input",
                 "route": self.queue_name,
@@ -53,12 +57,14 @@ class TestServiceHTTP(unittest.TestCase):
         queue = self.channel.queue_declare(
             queue=self.queue_name, passive=True, durable=True, exclusive=False
         )
-        self.assertEqual(queue.method.message_count, 1)
+        count = queue.method.message_count
+        self.channel.queue_delete(queue=self.queue_name)
+        self.assertEqual(count, 1)
 
     def test_send_payload_w_id(self):
         id = str(uuid.uuid4())
         response = requests.post(
-            "http://localhost:3000",
+            f"http://localhost:{self.port}",
             json={
                 "type": "input",
                 "route": "api-service",
@@ -76,7 +82,7 @@ class TestServiceHTTP(unittest.TestCase):
         self.assertEqual(response.text, id)
 
     def test_retrieving_fake_key(self):
-        response = requests.get("http://localhost:3000/id/fake-key", timeout=2.5)
+        response = requests.get(
+            f"http://localhost:{self.port}/id/fake-key", timeout=2.5)
         self.assertEqual(response.status_code, 200)
         self.assertIsNone(response.json())
-

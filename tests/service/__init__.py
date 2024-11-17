@@ -1,12 +1,14 @@
-from tests.docker import get_root_path, launch_container
+from tests.launch import launch_app, get_root_path
 
 
-def simple_start(env, network):
-    with open(f"{get_root_path()}/config/config.yaml", "w+") as f:
+def simple_start(env):
+    configPath = f"{get_root_path()}/config/config.test.yaml"
+    with open(configPath, "w+") as f:
         f.write("")
-    container = launch_container(
-        environment=env,
-        ports={"3000/tcp": 3000},
-        network=network,
+    container = launch_app(
+        environment={
+            **env,
+            "CONF__FILE": configPath,
+        }
     )
     return container

@@ -1,99 +1,84 @@
 import unittest
+import os
 
-from tests.docker import (
-    get_container_success,
+from tests.launch import (
     get_root_path,
-    launch_container,
-    launch_services,
-    stop_container,
+    launch_app,
+    get_exit_status,
 )
 
 
 class TestConfig(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.environment, cls.network, cls.services = launch_services()
-
-    @classmethod
-    def tearDownClass(cls):
-        stop_container(cls.network, cls.services)
-
     def test_misconfigured_config_file_location(self):
-        with open(f"{get_root_path()}/config/config.test.yaml", "w+") as f:
+        configPath = f"{get_root_path()}/config/config.test.yaml"
+        with open(configPath, "w+") as f:
             f.write(
                 """
-conf:
-  file: /config/config.yaml
-            """
+    conf:
+      file: /config/config.yaml
+                """
             )
 
-        container = launch_container(
-            network=self.network,
-            environment={"CONF__FILE": "/config/config.test.yaml",
-                         **self.environment},
+        container = launch_app(
+            environment={"CONF__FILE": configPath},
         )
-        self.assertFalse(get_container_success(container))
-        stop_container(self.network, container)
+        self.assertFalse(get_exit_status(container))
 
     def test_config_file_location(self):
-        with open(f"{get_root_path()}/config/config.test.yaml", "w+") as f:
-            f.write(
-                """
-conf:
-  file: /config/config.test.yaml
-            """
-            )
-
-        container = launch_container(
-            network=self.network,
-            environment={"CONF__FILE": "/config/config.test.yaml",
-                         **self.environment},
-        )
-        self.assertTrue(get_container_success(container))
-        stop_container(self.network, container)
-
-    def test_only_config_file_location(self):
-        with open(f"{get_root_path()}/config/config.yaml", "w+") as f:
+        configPath = f"{get_root_path()}/config/config.test.yaml"
+        with open(configPath, "w+") as f:
             f.write(
                 f"""
 conf:
-  file: /config/config.yaml
-
-  cache:
-    url: {self.environment["CACHE_URL"]}
-  bus:
-    url: {self.environment["BUS_URL"]}
+  file: {configPath}
             """
             )
 
-        container = launch_container(
-            network=self.network,
-            environment={
-                "CONF__FILE": "/config/config.yaml",
-            },
+        container = launch_app(
+            environment={"CONF__FILE": configPath},
         )
-        self.assertTrue(get_container_success(container))
-        stop_container(self.network, container)
+        self.assertTrue(get_exit_status(container))
+
+    def test_only_config_file_location(self):
+        configPath = f"{get_root_path()}/config/config.test.yaml"
+        with open(configPath, "w+") as f:
+            f.write(
+                f"""
+conf:
+  file: {configPath}
+
+  cache:
+    url: {os.environ["CACHE_URL"]}
+  bus:
+    url: {os.environ["BUS_URL"]}
+            """
+            )
+
+        container = launch_app(
+            environment={"CONF__FILE": configPath},
+        )
+        self.assertTrue(get_exit_status(container))
 
     def test_config_environment_variable(self):
-        with open(f"{get_root_path()}/config/config.yaml", "w+") as f:
+        configPath = f"{get_root_path()}/config/config.test.yaml"
+        with open(configPath, "w+") as f:
             f.write(
-                """
+                f"""
 conf:
-  file: /config/config.yaml
+  file: {configPath}
 
   cache:
     url: asasds
             """
             )
 
-        container = launch_container(
-            network=self.network,
+        container = launch_app(
             environment={
-                "CONF__CACHE__URL": self.environment["CACHE_URL"], **self.environment},
+                "CONF__CACHE__URL": os.environ["CACHE_URL"],
+                "CONF__FILE": configPath
+            },
         )
-        self.assertTrue(get_container_success(container))
-        stop_container(self.network, container)
+        self.assertTrue(get_exit_status(container))
 
 
 if __name__ == "__main__":

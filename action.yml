@@ -2,14 +2,10 @@ name: 'servc spec test'
 description: Tests a service library against the servc spec
 
 inputs:
-  dockerfile:
-    description: 'The dockerfile location'
+  startcmd:
+    description: 'The command to start the service'
     required: false
-    default: 'Dockerfile'
-  context:
-    description: 'The context to build'
-    required: false
-    default: '.'
+    default: '../start.sh'
   suite:
     description: 'The test suite to run'
     required: false
@@ -38,15 +34,6 @@ runs:
           requirements.test.txt
           config/.placeholder
 
-    - name: Build Docker Image
-      uses: docker/build-push-action@v5
-      with:
-        context: ${{ inputs.context }}
-        file: ${{ inputs.dockerfile }}
-        push: false
-        tags: servc:latest
-        load: true
-
     - run: pip install -r requirements.test.txt
       shell: bash
       working-directory: servc-docs
@@ -54,4 +41,6 @@ runs:
     - name: Run tests
       shell: bash
       working-directory: servc-docs
+      env:
+        START_SCRIPT: ${{ inputs.startcmd }}
       run: python -m unittest tests/${{ inputs.suite }}/**/*.py

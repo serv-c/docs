@@ -1,58 +1,56 @@
+import os
 import json
 import unittest
 import uuid
+import random
 
 import pika
 import requests
 
-from tests.docker import launch_services, stop_container
+from tests.launch import stop
 from tests.service import simple_start
 
 
 class TestServicePrefixes(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.environment, cls.network, cls.services = launch_services(True)
         cls.container = None
-
-        params = pika.URLParameters(cls.environment["BUS_URL_LOCAL"])
+        params = pika.URLParameters(os.environ["BUS_URL"])
         cls.conn = pika.BlockingConnection(params)
 
     @classmethod
     def tearDownClass(cls):
         cls.conn.close()
-        stop_container(cls.network, (*cls.services, cls.container))
+        stop(cls.container)
 
     def setUp(self):
         self.route = str(uuid.uuid4())
         self.channel = self.conn.channel()
+        self.port = random.randint(3000, 4000)
 
     def tearDown(self):
-        stop_container(self.network, self.container)
+        stop(self.container)
         self.container = None
-        self.channel.close()
+        if self.channel.is_open:
+            self.channel.close()
 
     def test_simple_bind_prefix(self):
         self.container = simple_start(
             {
-                **self.environment,
-                "CONF__BUS__QUEUE": self.route,
+                "CONF__BUS__ROUTE": self.route,
                 "CONF__BUS__PREFIX": "test-prefix",
+                "CONF__HTTP__PORT": self.port,
             },
-            self.network,
         )
 
-        try:
-            self.channel.queue_declare(
-                queue="test-prefix" + self.route,
-                passive=True,
-                durable=True,
-                exclusive=False,
-                auto_delete=False,
-            )
-        except Exception as e:
-            print(e)
-            raise Exception("Queue not found")
+        self.channel.queue_declare(
+            queue="test-prefix" + self.route,
+            passive=True,
+            durable=True,
+            exclusive=False,
+            auto_delete=False,
+        )
+        self.channel.queue_delete(queue="test-prefix" + self.route)
 
     def test_send_w_prefix(self):
         prefix = "test_prefix"
@@ -63,12 +61,14 @@ class TestServicePrefixes(unittest.TestCase):
         )
 
         self.container = simple_start(
-            {**self.environment, "CONF__BUS__PREFIX": prefix},
-            self.network,
+            {
+                "CONF__BUS__PREFIX": prefix,
+                "CONF__HTTP__PORT": self.port,
+            },
         )
 
         response = requests.post(
-            "http://localhost:3000",
+            f"http://localhost:{self.port}",
             json={
                 "type": "input",
                 "route": self.route,
@@ -86,7 +86,9 @@ class TestServicePrefixes(unittest.TestCase):
         queue = self.channel.queue_declare(
             queue=queue, passive=True, durable=True, exclusive=False, auto_delete=False
         )
-        self.assertEqual(queue.method.message_count, 1)
+        count = queue.method.message_count
+        self.channel.queue_delete(queue=queue.method.queue)
+        self.assertEqual(count, 1)
 
     def test_send_many_prefix(self):
         routePrefix = {
@@ -103,15 +105,14 @@ class TestServicePrefixes(unittest.TestCase):
             )
         self.container = simple_start(
             {
-                **self.environment,
                 "CONF__BUS__ROUTEMAP": json.dumps(routePrefix),
+                "CONF__HTTP__PORT": self.port,
             },
-            self.network,
         )
 
         for route, newRoute in routePrefix.items():
             response = requests.post(
-                "http://localhost:3000",
+                f"http://localhost:{self.port}",
                 json={
                     "type": "input",
                     "route": route,
@@ -133,4 +134,6 @@ class TestServicePrefixes(unittest.TestCase):
                 exclusive=False,
                 auto_delete=False,
             )
-            self.assertEqual(queue.method.message_count, 1)
+            count = queue.method.message_count
+            self.channel.queue_delete(queue=newRoute)
+            self.assertEqual(count, 1)
