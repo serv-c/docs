@@ -41,23 +41,4 @@ jobs:
         shell: bash
         run: commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
 
-      - name: 'Get Previous tag'
-        run: |
-          LATEST_VERSION=$(git describe --tags "$(git rev-list --tags --max-count=1)")
-          echo "tag=$LATEST_VERSION" >> $GITHUB_OUTPUT
-          echo $LATEST_VERSION
-
-      - name: Conventional Changelog Action
-        id: changelog
-        if: github.ref_name == 'main'
-        uses: TriPSs/conventional-changelog-action@v3
-        with:
-          github-token: ${{ github.token }}
-          git-url: ${{ github.server_url != 'https://github.com' && 'git.yusufali.ca' || 'github.com' }}
-          tag-prefix: ""
-          output-file: false
-          skip-version-file: true
-          skip-commit: true
-          skip-ci: false
-          skip-tag: ${{ github.ref_name != 'main' }}
-          fallback-version: ${{ env.tag }}
+      - uses: https://git.yusufali.ca/actions/commit@main
