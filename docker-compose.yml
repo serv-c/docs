@@ -1,9 +1,0 @@
-version: "3.8"
-
-services:
-  mkdocs:
-    build:
-      context: .
-    volumes:
-      - .:/workspace:cached
-    command: sleep infinity

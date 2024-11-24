@@ -1,12 +1,12 @@
 {
-  "service": "mkdocs",
-  "workspaceFolder": "/workspace",
-  "dockerComposeFile": "../docker-compose.yml",
+  "image": "mcr.microsoft.com/vscode/devcontainers/python",
+  "postStartCommand": "pip install -r requirements.txt && mkdocs serve",
   "customizations": {
     "vscode": {
       "extensions": [
         "GitHub.copilot",
-        "ms-python.python"
+        "ms-python.python",
+        "bierner.markdown-mermaid"
       ]
     }
   }

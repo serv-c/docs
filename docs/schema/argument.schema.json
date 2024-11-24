@@ -12,6 +12,15 @@
       "inputs": {
         "description": "The inputs to pass into the method",
         "type": "any"
+      },
+      "hooks": {
+        "description": "Hooks to modify the execution flow of a method",
+        "type": "object",
+        "properties": {
+          "oncomplete": {
+            "$ref": "https://docs.servc.io/schema/worker-hooks-oncomplete.schema.json"
+          }
+        }
       }
     },
     "required": [ "method", "inputs" ]

@@ -6,6 +6,7 @@ import random
 import pika
 import requests
 
+from tests import get_route_message, get_message_body, set_key_value
 from tests.launch import stop
 from tests.service import simple_start
 
@@ -54,11 +55,76 @@ class TestServiceHTTP(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        queue = self.channel.queue_declare(
-            queue=self.queue_name, passive=True, durable=True, exclusive=False
+        message, count = get_route_message(self.channel, self.queue_name)
+        self.assertEqual(count, 1)
+
+        self.assertEqual(message["type"], "input")
+        self.assertEqual(message["route"], self.queue_name)
+        self.assertEqual(message["id"], response.text)
+        self.assertIn("argumentId", message)
+
+        payload = get_message_body(message)
+        self.assertEqual(payload["method"], "test-method")
+        self.assertEqual(payload["inputs"], self.queue_name)
+
+    def test_caching(self):
+        id = str(uuid.uuid4())
+        route = str(uuid.uuid4())
+        self.channel.queue_declare(
+            queue=route, durable=True, exclusive=False, auto_delete=False
         )
-        count = queue.method.message_count
-        self.channel.queue_delete(queue=self.queue_name)
+        set_key_value(
+            id,
+            {
+                "id": id,
+                "progress": 30,
+                "statusCode": 200,
+                "isError": True,
+                "reponseBody": "test-response",
+            }
+        )
+        response = requests.post(
+            f"http://localhost:{self.port}",
+            json={
+                "type": "input",
+                "route": route,
+                "id": id,
+                "argument": {
+                    "method": "test-method",
+                    "inputs": {
+                        "test-key": "test-value",
+                    },
+                },
+            },
+            timeout=2.5,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.text, id)
+
+        _m, count = get_route_message(
+            self.channel, self.route, deleteRoute=False)
+        self.assertEqual(count, 0)
+
+        response = requests.post(
+            f"http://localhost:{self.port}",
+            json={
+                "type": "input",
+                "route": route,
+                "id": id,
+                "force": True,
+                "argument": {
+                    "method": "test-method",
+                    "inputs": {
+                        "test-key": "test-value",
+                    },
+                },
+            },
+            timeout=2.5,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.text, id)
+
+        _m, count = get_route_message(self.channel, self.route)
         self.assertEqual(count, 1)
 
     def test_send_payload_w_id(self):

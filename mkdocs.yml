@@ -10,7 +10,11 @@ nav:
   #   - Client: frontend/client.md
   - Services:
       - services/index.md
-      - Worker: services/worker.md
+      - Worker: 
+        - services/worker/index.md
+        - Hooks:
+          - services/worker/hooks/index.md
+          - OnComplete: services/worker/hooks/oncomplete.md
       - Middleware: services/middleware.md
   - Configs:
       - config/index.md

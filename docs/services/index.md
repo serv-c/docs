@@ -77,6 +77,6 @@ POST /
 
 The format for the microservice information will follow the [identification schema](../schema/identification.schema.json).
 
-## [Worker](worker.md)
+## [Worker](./worker/)
 
 The worker code should be specific to its function and maintain a connection with the bus and subscribe to a topic or queue. The subscription will allow the bus to send tasks to the service to process and complete. Middleware may need to maintain an open connection or establish as necessary.

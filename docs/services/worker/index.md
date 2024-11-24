@@ -20,9 +20,9 @@ sequenceDiagram
     deactivate worker
 ```
 
-1. retrieve the [payload](../schema/payload.schema.json) from the bus on the queue/topic that the worker has subscribed to.
-2. retrieve the [arguments object](../schema/argument.schema.json) from the cache at key `arugmentId`
-3. perform work while storing progress in the cache at location `id` as an [artifact response](../schema/response.schema.json). Microservices will leverage the middleware as needed to perform work
+1. retrieve the [payload](../../schema/payload.schema.json) from the bus on the queue/topic that the worker has subscribed to.
+2. retrieve the [arguments object](../../schema/argument.schema.json) from the cache at key `arugmentId`
+3. perform work while storing progress in the cache at location `id` as an [artifact response](../../schema/response.schema.json). Microservices will leverage the middleware as needed to perform work. The flow of process work can be modified via [worker hooks](./hooks/)
 4. store the solution/response at location `id` in cache.
 
 `id` is an optional string that represents the arguments object and the state of the system.

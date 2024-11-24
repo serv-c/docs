@@ -7,6 +7,7 @@ import random
 import pika
 import requests
 
+from tests import get_route_message
 from tests.launch import stop
 from tests.service import simple_start
 
@@ -83,11 +84,7 @@ class TestServicePrefixes(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-        queue = self.channel.queue_declare(
-            queue=queue, passive=True, durable=True, exclusive=False, auto_delete=False
-        )
-        count = queue.method.message_count
-        self.channel.queue_delete(queue=queue.method.queue)
+        _m, count = get_route_message(self.channel, queue)
         self.assertEqual(count, 1)
 
     def test_send_many_prefix(self):
@@ -127,13 +124,5 @@ class TestServicePrefixes(unittest.TestCase):
             )
             self.assertEqual(response.status_code, 200)
 
-            queue = self.channel.queue_declare(
-                queue=newRoute,
-                passive=True,
-                durable=True,
-                exclusive=False,
-                auto_delete=False,
-            )
-            count = queue.method.message_count
-            self.channel.queue_delete(queue=newRoute)
+            _m, count = get_route_message(self.channel, newRoute)
             self.assertEqual(count, 1)
