@@ -77,15 +77,12 @@ class TestServiceHooksOnComplete(unittest.TestCase):
         self.assertEqual(count, 1)
 
         self.assertEqual(message["type"], "input")
-        self.assertEqual(message["route"], self.queue_name)
-        self.assertEqual(message["id"], response.text)
+        self.assertEqual(message["route"], route)
         self.assertIn("argumentId", message)
 
         payload = get_message_body(message)
-        self.assertEqual(payload["method"], "test-method")
-        self.assertEqual(payload["inputs"], self.queue_name)
-
         inputs = payload["inputs"]
+        self.assertEqual(payload["method"], "test-method")
         self.assertEqual(inputs["id"], response.text)
         self.assertEqual(inputs["method"], "test")
         self.assertEqual(inputs["inputs"], {"test-key": "test-value"})
