@@ -1,6 +1,7 @@
 import unittest
 import uuid
 import random
+import time
 
 import requests
 
@@ -35,6 +36,7 @@ class TestSimpleMethod(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
         id = response.text
+        time.sleep(10)
 
         response = requests.get(
             f"http://localhost:{self.port}/id/{id}", timeout=2.5)
@@ -61,6 +63,7 @@ class TestSimpleMethod(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
         id = response.text
+        time.sleep(10)
 
         response = requests.get(
             f"http://localhost:{self.port}/id/{id}", timeout=2.5)
