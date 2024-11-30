@@ -1,6 +1,8 @@
-from subprocess import Popen, PIPE, STDOUT
-import time
 import os
+import time
+from subprocess import PIPE, STDOUT, Popen
+
+import psutil
 
 
 def get_root_path():
@@ -13,8 +15,9 @@ def launch_app(environment: None | dict = None):
         for key, value in environment.items():
             current_env[key] = str(value)
 
-    process = Popen(os.environ.get("START_SCRIPT"),
-                    env=current_env, stdout=PIPE, stderr=STDOUT)
+    process = Popen(
+        os.environ.get("START_SCRIPT"), env=current_env, stdout=PIPE, stderr=STDOUT
+    )
     time.sleep(10)
     return process
 
@@ -24,7 +27,7 @@ def get_logs(process: Popen):
 
 
 def is_running(process: Popen):
-    return process.poll() is None
+    return process is not None and process.poll() is None
 
 
 def get_exit_status(process: Popen):
@@ -39,7 +42,15 @@ def get_exit_status(process: Popen):
 
 
 def stop(process: Popen | None):
-    if process:
+    if process or is_running(process):
+        try:
+            parent = psutil.Process(process.pid)
+            for child in parent.children(recursive=True):
+                child.terminate()
+                child.kill()
+        except psutil.NoSuchProcess:
+            pass
         process.terminate()
         process.kill()
+        process.wait()
         time.sleep(1)

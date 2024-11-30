@@ -4,13 +4,19 @@ Serv-C is an opionated framework for full E2E services at scale. This repo is th
 
 ## Mandatory Library Startup Interfaces
 
-**Test Method**
-```
-method: test
-argument: str[]
-response:
-  false - if the argument does not meet type check.
-  true - if the argument meeds the type check
+**Resolvers**
+```yaml
+- method: test
+  argument: str[]
+  response:
+    false: |
+      if the argument does not meet type check. and then send a message to queue environment variable SEND_QUEUE [default: my-response-queue] with the payload being the argument
+    true: |
+      if the argument meeds the type check and then send an event with the payload under the env variable EVENT [default: my-event]
+
+- method: fail
+  arugment: any[]
+  response: raise an exception
 ```
 
 ## GitHub Action

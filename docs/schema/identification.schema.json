@@ -5,7 +5,7 @@
     "description": "The response for the microservice to identify itself",
     "type": "object",
     "properties": {
-      "instanceid": {
+      "instanceId": {
         "type": "string",
         "description": "The instance id of the microservice"
       },
@@ -25,6 +25,6 @@
         }
       }
     },
-    "required": [ "instanceid", "queue", "prefix", "methods" ]
+    "required": [ "instanceId", "queue", "prefix", "methods" ]
   }
   

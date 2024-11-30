@@ -1,8 +1,7 @@
-import os
 import json
+import os
 import unittest
 import uuid
-import random
 
 import pika
 import requests
@@ -27,11 +26,10 @@ class TestServicePrefixes(unittest.TestCase):
     def setUp(self):
         self.route = str(uuid.uuid4())
         self.channel = self.conn.channel()
-        self.port = random.randint(3000, 4000)
+        self.port = 3000
 
     def tearDown(self):
         stop(self.container)
-        self.container = None
         if self.channel.is_open:
             self.channel.close()
 

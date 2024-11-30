@@ -1,12 +1,12 @@
 import os
 import unittest
 import uuid
-import random
+import socket
 
 import pika
 import requests
 
-from tests import get_route_message, get_message_body, set_key_value
+from tests import get_message_body, get_route_message, set_key_value
 from tests.launch import stop
 from tests.service import simple_start
 
@@ -16,7 +16,7 @@ class TestServiceHTTP(unittest.TestCase):
     def setUpClass(cls):
         cls.queue_name = str(uuid.uuid4())
         cls.route = str(uuid.uuid4())
-        cls.port = random.randint(3000, 4000)
+        cls.port = 3000
         env = {"CONF__BUS__ROUTE": cls.route, "CONF__HTTP__PORT": cls.port}
         cls.container = simple_start(env)
 
@@ -79,9 +79,9 @@ class TestServiceHTTP(unittest.TestCase):
                 "id": id,
                 "progress": 30,
                 "statusCode": 200,
-                "isError": True,
+                "isError": False,
                 "reponseBody": "test-response",
-            }
+            },
         )
         response = requests.post(
             f"http://localhost:{self.port}",
@@ -102,30 +102,30 @@ class TestServiceHTTP(unittest.TestCase):
         self.assertEqual(response.text, id)
 
         _m, count = get_route_message(
-            self.channel, self.route, deleteRoute=False)
+            self.channel, route, deleteRoute=False)
         self.assertEqual(count, 0)
 
-        # response = requests.post(
-        #     f"http://localhost:{self.port}",
-        #     json={
-        #         "type": "input",
-        #         "route": route,
-        #         "id": id,
-        #         "force": True,
-        #         "argument": {
-        #             "method": "test-method",
-        #             "inputs": {
-        #                 "test-key": "test-value",
-        #             },
-        #         },
-        #     },
-        #     timeout=2.5,
-        # )
-        # self.assertEqual(response.status_code, 200)
-        # self.assertEqual(response.text, id)
+        response = requests.post(
+            f"http://localhost:{self.port}",
+            json={
+                "type": "input",
+                "route": route,
+                "id": id,
+                "force": True,
+                "argument": {
+                    "method": "test-method",
+                    "inputs": {
+                        "test-key": "test-value",
+                    },
+                },
+            },
+            timeout=2.5,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.text, id)
 
-        # _m, count = get_route_message(self.channel, self.route)
-        # self.assertEqual(count, 1)
+        _m, count = get_route_message(self.channel, route)
+        self.assertEqual(count, 1)
 
     def test_send_payload_w_id(self):
         id = str(uuid.uuid4())
@@ -149,6 +149,15 @@ class TestServiceHTTP(unittest.TestCase):
 
     def test_retrieving_fake_key(self):
         response = requests.get(
-            f"http://localhost:{self.port}/id/fake-key", timeout=2.5)
+            f"http://localhost:{self.port}/id/fake-key", timeout=2.5
+        )
         self.assertEqual(response.status_code, 200)
         self.assertIsNone(response.json())
+
+    def test_identifacton(self):
+        response = requests.get(
+            f"http://localhost:{self.port}", timeout=2.5)
+        self.assertEqual(response.status_code, 200)
+        response = response.json()
+        self.assertEqual(response["instanceId"], socket.gethostname())
+        self.assertEqual(response["queue"], self.route)

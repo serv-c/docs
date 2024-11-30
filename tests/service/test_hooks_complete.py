@@ -1,12 +1,11 @@
 import os
 import unittest
 import uuid
-import random
 
 import pika
 import requests
 
-from tests import get_route_message, get_message_body
+from tests import get_message_body, get_route_message
 from tests.launch import stop
 from tests.service import simple_start
 
@@ -15,7 +14,7 @@ class TestServiceHooksOnComplete(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.route = str(uuid.uuid4())
-        cls.port = random.randint(3000, 4000)
+        cls.port = 3000
         cls.container = simple_start(
             {
                 "CONF__BUS__ROUTE": cls.route,

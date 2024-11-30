@@ -2,12 +2,7 @@ import unittest
 
 import requests
 
-from tests.launch import (
-    get_root_path,
-    launch_app,
-    stop,
-    is_running,
-)
+from tests.launch import get_root_path, is_running, launch_app, stop
 
 
 class TestConfigHTTP(unittest.TestCase):

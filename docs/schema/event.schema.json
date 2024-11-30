@@ -14,6 +14,10 @@
         "description": "the id of the microservice service instance to process the payload. This is used to force a specific microservice instance to process the payload",
         "type": "string"
       },
+      "event": {
+        "type": "string",
+        "description": "The event name"
+      },
       "details": {
         "type": "object",
         "description": "The details of the event"

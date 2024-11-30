@@ -1,4 +1,4 @@
-from tests.launch import launch_app, get_root_path
+from tests.launch import get_root_path, launch_app
 
 
 def simple_start(env):
