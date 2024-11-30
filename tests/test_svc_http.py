@@ -157,3 +157,7 @@ class TestServiceHTTP(unittest.TestCase):
         response = response.json()
         self.assertEqual(response["instanceId"], socket.gethostname())
         self.assertEqual(response["queue"], self.route)
+
+
+if __name__ == "__main__":
+    unittest.main()

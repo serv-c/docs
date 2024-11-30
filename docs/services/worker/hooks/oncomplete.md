@@ -59,6 +59,15 @@ To use the send message hook, the oncomplete must be specified as below,
     "type": "sendmessage",
     "route": "my-route", // the route to send to upon completion
     "method": "my method", // the method to send the below payload
+
+    // inputs is a non required filed. if specified, this is what is 
+    // passed into 'my method' at 'my-route'. Otherwise, it is as described
+    // below,
+    "inputs": {
+        "id": "string",
+        "method": "my method",
+        "inputs": {}
+    }
 }
 ```
 

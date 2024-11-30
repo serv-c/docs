@@ -17,6 +17,13 @@ Serv-C is an opionated framework for full E2E services at scale. This repo is th
 - method: fail
   arugment: any[]
   response: raise an exception
+
+- method: hook
+  argument: str
+  response: number - representing the number of characters in the string
+- method: hook_part
+  argument: str[]
+  response: will create parts for each element in the list
 ```
 
 ## GitHub Action

@@ -123,3 +123,7 @@ class TestServicePrefixes(unittest.TestCase):
 
             _m, count = get_route_message(self.channel, newRoute)
             self.assertEqual(count, 1)
+
+
+if __name__ == "__main__":
+    unittest.main()

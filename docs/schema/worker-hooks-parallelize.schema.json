@@ -1,0 +1,22 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://docs.servc.io/schema/worker-hooks-parallelize.schema.json",
+    "title": "Hook Parallelize Schema",
+    "description": "Hook decorator to describe tasks running in parallel",
+    "type": "object",
+    "properties": {
+        "part_id": {
+            "type": "number",
+            "description": "The current part or task of the total"
+        },
+        "total_parts": {
+            "type": "number",
+            "description": "The total number of parts or tasks"
+        },
+        "part_queue": {
+            "type": "string",
+            "description": "The queue name to publish the decorated message after processing this part"
+        }
+    }
+}
+  

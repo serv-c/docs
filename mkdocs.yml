@@ -14,6 +14,7 @@ nav:
         - services/worker/index.md
         - Hooks:
           - services/worker/hooks/index.md
+          - Parallelize: services/worker/hooks/parallelize.md
           - OnComplete: services/worker/hooks/oncomplete.md
       - Middleware: services/middleware.md
   - Configs:

@@ -251,3 +251,7 @@ class TestSimpleMethod(unittest.TestCase):
         message, count = get_route_message(self.channel, self.route)
         self.assertEqual(count, 1)
         self.assertEqual(message["instanceId"], instanceId)
+
+
+if __name__ == "__main__":
+    unittest.main()

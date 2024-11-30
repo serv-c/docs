@@ -84,3 +84,59 @@ class TestServiceHooksOnComplete(unittest.TestCase):
         self.assertEqual(inputs["id"], response.text)
         self.assertEqual(inputs["method"], "test")
         self.assertEqual(inputs["inputs"], {"test-key": "test-value"})
+
+    def test_with_defined_inputs(self):
+        route = str(uuid.uuid4())
+        self.channel.queue_declare(
+            queue=route,
+            durable=True,
+            exclusive=False,
+            auto_delete=False,
+        )
+        response = requests.post(
+            f"http://localhost:{self.port}",
+            json={
+                "type": "input",
+                "route": self.route,
+                "argument": {
+                    "method": "test",
+                    "inputs": {
+                        "test-key": "test-value",
+                    },
+                    "hooks": {
+                        "on_complete": [
+                            {
+                                "type": "sendmessage",
+                                "route": route,
+                                "method": "test-method",
+                                "inputs": {
+                                    "id": "my-id",
+                                    "method": "dummy-method",
+                                    "inputs": True,
+                                },
+                            }
+                        ]
+                    },
+                },
+            },
+            timeout=2.5,
+        )
+        self.assertEqual(response.status_code, 200)
+
+        message, count = get_route_message(self.channel, route)
+        self.assertEqual(count, 1)
+
+        self.assertEqual(message["type"], "input")
+        self.assertEqual(message["route"], route)
+        self.assertIn("argumentId", message)
+
+        payload = get_message_body(message)
+        inputs = payload["inputs"]
+        self.assertEqual(payload["method"], "test-method")
+        self.assertEqual(inputs["id"], "my-id")
+        self.assertEqual(inputs["method"], "dummy-method")
+        self.assertEqual(inputs["inputs"], True)
+
+
+if __name__ == "__main__":
+    unittest.main()
