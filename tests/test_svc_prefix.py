@@ -6,9 +6,8 @@ import uuid
 import pika
 import requests
 
-from tests import get_route_message
+from tests import get_route_message, simple_start
 from tests.launch import stop
-from tests.service import simple_start
 
 
 class TestServicePrefixes(unittest.TestCase):

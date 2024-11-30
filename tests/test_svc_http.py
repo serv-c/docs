@@ -1,14 +1,13 @@
 import os
+import socket
 import unittest
 import uuid
-import socket
 
 import pika
 import requests
 
-from tests import get_message_body, get_route_message, set_key_value
+from tests import get_message_body, get_route_message, set_key_value, simple_start
 from tests.launch import stop
-from tests.service import simple_start
 
 
 class TestServiceHTTP(unittest.TestCase):
@@ -37,8 +36,7 @@ class TestServiceHTTP(unittest.TestCase):
         self.channel.close()
 
     def test_send_payload_to_queue(self):
-        self.channel.queue_declare(
-            queue=self.queue_name, durable=True, exclusive=False)
+        self.channel.queue_declare(queue=self.queue_name, durable=True, exclusive=False)
 
         response = requests.post(
             f"http://localhost:{self.port}",
@@ -101,8 +99,7 @@ class TestServiceHTTP(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.text, id)
 
-        _m, count = get_route_message(
-            self.channel, route, deleteRoute=False)
+        _m, count = get_route_message(self.channel, route, deleteRoute=False)
         self.assertEqual(count, 0)
 
         response = requests.post(
@@ -155,8 +152,7 @@ class TestServiceHTTP(unittest.TestCase):
         self.assertIsNone(response.json())
 
     def test_identifacton(self):
-        response = requests.get(
-            f"http://localhost:{self.port}", timeout=2.5)
+        response = requests.get(f"http://localhost:{self.port}", timeout=2.5)
         self.assertEqual(response.status_code, 200)
         response = response.json()
         self.assertEqual(response["instanceId"], socket.gethostname())

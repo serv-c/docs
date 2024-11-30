@@ -1,11 +1,7 @@
-import unittest
 import os
+import unittest
 
-from tests.launch import (
-    get_root_path,
-    launch_app,
-    get_exit_status,
-)
+from tests.launch import get_exit_status, get_root_path, launch_app
 
 
 class TestConfig(unittest.TestCase):
@@ -75,7 +71,7 @@ conf:
         container = launch_app(
             environment={
                 "CONF__CACHE__URL": os.environ["CACHE_URL"],
-                "CONF__FILE": configPath
+                "CONF__FILE": configPath,
             },
         )
         self.assertTrue(get_exit_status(container))

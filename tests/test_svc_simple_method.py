@@ -6,9 +6,8 @@ import uuid
 import pika
 import requests
 
-from tests import get_message_body, get_route_message
+from tests import get_message_body, get_route_message, simple_start
 from tests.launch import is_running, stop
-from tests.service import simple_start
 
 
 class TestSimpleMethod(unittest.TestCase):
@@ -49,8 +48,8 @@ class TestSimpleMethod(unittest.TestCase):
     def tearDown(self):
         if self.channel.is_open:
             self.channel.close()
-        if is_running(self.container):
-            stop(self.container)
+        # if is_running(self.container):
+        #     stop(self.container)
 
     def test_send_valid_payload(self):
         response = requests.post(
