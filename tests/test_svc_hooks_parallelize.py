@@ -64,12 +64,12 @@ class TestServiceHooksParallelize(unittest.TestCase):
                         "part": {
                             "part_id": 3,
                             "total_parts": 10,
-                            "part_queue": route[0],
+                            "part_queue": routes[0],
                         },
                         "on_complete": [
                             {
                                 "type": "sendmessage",
-                                "route": route[1],
+                                "route": routes[1],
                                 "method": "test-method",
                             }
                         ],
@@ -80,7 +80,8 @@ class TestServiceHooksParallelize(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-        _m, count = get_route_message(self.channel, self.route)
+        _m, count = get_route_message(
+            self.channel, self.route, deleteRoute=False)
         self.assertEqual(count, 0)
 
         _m, count = get_route_message(self.channel, routes[0])
@@ -114,12 +115,12 @@ class TestServiceHooksParallelize(unittest.TestCase):
                         "part": {
                             "part_id": 1,
                             "total_parts": 1,
-                            "part_queue": route[0],
+                            "part_queue": routes[0],
                         },
                         "on_complete": [
                             {
                                 "type": "sendmessage",
-                                "route": route[1],
+                                "route": routes[1],
                                 "method": "test-method",
                             }
                         ],
@@ -130,7 +131,8 @@ class TestServiceHooksParallelize(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-        _m, count = get_route_message(self.channel, self.route)
+        _m, count = get_route_message(
+            self.channel, self.route, deleteRoute=False)
         self.assertEqual(count, 0)
 
         # the on_complete hook should be executed
@@ -176,7 +178,8 @@ class TestServiceHooksParallelize(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         # the message should be consumed by the route
-        _m, count = get_route_message(self.channel, self.route)
+        _m, count = get_route_message(
+            self.channel, self.route, deleteRoute=False)
         self.assertEqual(count, 0)
 
         # the on_complete hook should be executed
