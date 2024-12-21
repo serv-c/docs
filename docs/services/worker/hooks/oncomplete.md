@@ -66,7 +66,7 @@ To use the send message hook, the oncomplete must be specified as below,
     "inputs": {
         "id": "string",
         "method": "my method",
-        "inputs": {}
+        "inputs": {}    // inputs will be the original input
     }
 }
 ```

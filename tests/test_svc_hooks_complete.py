@@ -109,11 +109,7 @@ class TestServiceHooksOnComplete(unittest.TestCase):
                                 "type": "sendmessage",
                                 "route": route,
                                 "method": "test-method",
-                                "inputs": {
-                                    "id": "my-id",
-                                    "method": "dummy-method",
-                                    "inputs": True,
-                                },
+                                "inputs": True,
                             }
                         ]
                     },
@@ -133,9 +129,7 @@ class TestServiceHooksOnComplete(unittest.TestCase):
         payload = get_message_body(message)
         inputs = payload["inputs"]
         self.assertEqual(payload["method"], "test-method")
-        self.assertEqual(inputs["id"], "my-id")
-        self.assertEqual(inputs["method"], "dummy-method")
-        self.assertEqual(inputs["inputs"], True)
+        self.assertEqual(inputs, True)
 
 
 if __name__ == "__main__":
