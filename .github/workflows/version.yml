@@ -57,13 +57,17 @@ jobs:
           skip-tag: ${{ github.ref_name != 'main' }}
           fallback-version: ${{ steps.previoustagold.outputs.tag }}
 
+      - name: "Get New tag"
+        id: newtag
+        if: github.ref_name == 'main'
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+
       - name: Create Version Badge
         uses: RubbaBoy/BYOB@v1.3.0
         if: github.ref_name == 'main'
         with:
           NAME: servc-spec-version
-          ICON: data:image/png;base64,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
           LABEL: 'Serv-C'
-          STATUS: ${{ steps.changelog.outputs.tag }}
+          STATUS: ${{ steps.newtag.outputs.tag }}
           COLOR: cyan
           GITHUB_TOKEN: ${{ github.token }}
