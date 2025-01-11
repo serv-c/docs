@@ -6,11 +6,15 @@ All [middleware](../schema/middleware.schema.json) should have the following int
 classDiagram
 
 class Middleware {
+  -name: str
+  +constructor(config: Config)
   +connect()
   +close()
   +isOpen() boolean
 }
 ```
+
+Where [config](./config/index.md) is a key:value pair dictionary that is scoped to the middleware by its `name` property. So if the name property is 'bus', the config object will be scoped to `config.bus`.
 
 ## Cache
 
@@ -21,7 +25,6 @@ classDiagram
 
 class Middleware
 class Cache {
-  +connect(conn_url)
   +setKey(id, value)
   +getKey(id) any|null
 }
@@ -29,9 +32,9 @@ class Cache {
 Cache <|-- Middleware
 ```
 
-### connect(conn_url)
+### config
 
-Establish a connecton to the cache middleware
+The configuration parameters for the default cache middleware should be the connection url.
 
 Parameters:
 
@@ -72,7 +75,7 @@ class Bus {
   +String prefix
   +Dict routePrefix
 
-  +connect(conn_url, prefix, routePrefix)
+  +connect()
   +subscribe(route, inputHandler, onConsuming, onMessage)
   +send(route, message) boolean
   +emitEvent(event) boolean
@@ -81,7 +84,7 @@ class Bus {
 Bus <|-- Middleware
 ```
 
-### connect(conn_url, prefix)
+### config
 
 Parameters:
 
@@ -97,8 +100,8 @@ Parameters:
 | name         | type         | description                                           |
 | ------------ | ------------ | ----------------------------------------------------- |
 | route        | str          | the route to subscribe to                             |
-| inputHandler | [INPUTHANDLER](../schema/middleware-bus-inputhandler.schema.json) | a function to handle messages routed to the service   |
-| onConsuming  | [ONCONSUMING](../schema/middleware-bus-onconsuming.schema.json)  | a call back function when the service is consuming    |
+| inputHandler | [INPUTHANDLER](./schema/middleware-bus-inputhandler.schema.json) | a function to handle messages routed to the service   |
+| onConsuming  | [ONCONSUMING](./schema/middleware-bus-onconsuming.schema.json)  | a call back function when the service is consuming    |
 
 ### send(route, message)
 
@@ -107,7 +110,7 @@ Parameters:
 | name         | type         | description                                           |
 | ------------ | ------------ | ----------------------------------------------------- |
 | route        | str          | the route to subscribe to                             |
-| message | [Payload](../schema/payload.schema.json) | a function to handle messages routed to the service   |
+| message | [Payload](./schema/payload.schema.json) | a function to handle messages routed to the service   |
 
 Returns:
 
@@ -119,7 +122,7 @@ Parameters:
 
 | name         | type         | description                                           |
 | ------------ | ------------ | ----------------------------------------------------- |
-| event        | [Event](../schema/event.schema.json)          | the event to emit                          |
+| event        | [Event](./schema/event.schema.json)          | the event to emit                          |
 
 Returns:
 

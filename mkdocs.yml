@@ -5,18 +5,15 @@ repo_name: serv-c/docs
 site_url: https://docs.servc.io
 
 nav:
-  - Home: index.md
-  # - Frontend:
-  #   - Client: frontend/client.md
-  - Services:
-      - services/index.md
-      - Worker: 
-        - services/worker/index.md
-        - Hooks:
-          - services/worker/hooks/index.md
-          - Parallelize: services/worker/hooks/parallelize.md
-          - OnComplete: services/worker/hooks/oncomplete.md
-      - Middleware: services/middleware.md
+  - Home:
+    - index.md
+    - Worker: 
+      - worker/index.md
+      - Hooks:
+        - worker/hooks/index.md
+        - Parallelize: worker/hooks/parallelize.md
+        - OnComplete: worker/hooks/oncomplete.md
+    - Middleware: middleware.md
   - Configs:
       - config/index.md
 

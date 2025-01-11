@@ -6,7 +6,7 @@
 ]
 ```
 
-The [on complete](../../../schema/worker-hooks-oncomplete.schema.json) hook runs a series of tasks after a job has completed successfully or not. The order of execution is based on the order as presented in the array. Thus, if the first hook fails to execute, subsequent hooks will fail. No event is thrown if the hook fails to execute.
+The [on complete](../../schema/worker-hooks-oncomplete.schema.json) hook runs a series of tasks after a job has completed successfully or not. The order of execution is based on the order as presented in the array. Thus, if the first hook fails to execute, subsequent hooks will fail. No event is thrown if the hook fails to execute.
 
 On complete hooks are obsecure to the program executing them, and fully co-ordinated by the program sending the payload. Orchestrators can make full use of this in order to perform a workflow of tasks.
 
@@ -71,7 +71,7 @@ To use the send message hook, the oncomplete must be specified as below,
 }
 ```
 
-The schema for the payload is [argument schema](../../../schema/argument.schema.json) with the id of where the response is stored.
+The schema for the payload is [argument schema](../../schema/argument.schema.json) with the id of where the response is stored.
 
 ```json
 {

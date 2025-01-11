@@ -1,46 +1,82 @@
-# Serv-c
+# Services
 
-Serv-c is an opinionated framework and prescribes a pattern for cloud-native technologies. Serv-c spans data engineering, modeling, services, database schemas, and front-end technologies. Serv-c specializes in dimensionalized data and assumes that all data can be a set of dimensions and observations measured at the intersection of dimensions.
-
-## Segments
-
-Frontend
-
-[Services](services/index.md)
-
-Database
-
-Data Engineering
-
-## Process Flow
+The microservice layer responds to requests in a nonblocking manner to the client.
 
 ```mermaid
 block-beta
-  columns 5
-  block:inputtypes
-    columns 1
-    iexternal["external input"]
-    ioltp["oltp inputs"]
-  end
 
-  etl{{"ETL"}}
+columns 4
 
-  block:db
-    columns 1
-    db1[("olap")]
-    db2[("oltp")]
-  end
 
-  services(("Services"))
-  ui(("UI"))
-  space space ioltp2(("trigger"))
+space space bus cache
+space space space space
+request space
+block:microservice:2
+  http["http server"]
+  worker
+end
+space space space space
+space space middleware:2
+style worker stroke-dasharray: 5 5
 
-  inputtypes --> etl{{"ETL"}}
-  etl{{"ETL"}} -- "publishing" --> db1
-  db --> services(["Services"])
-  services --> ui(("UI"))
-  ui --> ioltp2
-  ioltp2 --> ioltp
+
+request --> http
+http --> bus
+http --> cache
+bus --> worker
+worker --> bus
+worker --> cache
+worker --> middleware
 ```
 
-A trigger can either be batch, continuous, or both. The OLTP is updated with user inputs and can be combined with the OLAP to make a single view. Data can be generated or appended to the OLAP to provide a consistent UI. The OLAP is preferred for outputs of the ETL because it is faster than the OLTP and segregates User input (OLTP) from Process outputs (OLAP).
+A microservice will always have an HTTP server and optionally a worker.
+
+## HTTP Server
+
+The HTTP server will receive and be responsible for:
+
+- **health checks**: to ensure the service is healthy
+- **messaging**: sending messages along the bus for services to perform work
+- **responses**: checking the cache for the response from the worker
+- **spawn**: spawns the worker process and observes the health of the worker process
+
+The HTTP server is the observer to the worker and health checks should fail if the worker is not running or unhealthy. The following interface should be implemented,
+
+```mermaid
+classDiagram
+
+class HTTPServer{
+  +start()
+  +stop()
+  +getId(string id) any
+  +sendMessage(WebPayload message) boolean
+  +health() boolean
+}
+```
+
+The server will respond to the following http interface,
+
+```
+GET /healthz
+GET /readyz
+      200   OK
+      >400  not okay
+
+GET /id/:id
+    200   responds with the value of id in cache
+    404   value does not exist in cache
+    >500  issue accessing id in cache
+
+GET /
+    200   responds with microservice information
+
+POST /
+    200   message sent along bus
+    500   issue sending message to bus
+```
+
+The format for the microservice information will follow the [identification schema](./schema/identification.schema.json).
+
+## [Worker](./worker/)
+
+The worker code should be specific to its function and maintain a connection with the bus and subscribe to a topic or queue. The subscription will allow the bus to send tasks to the service to process and complete. Middleware may need to maintain an open connection or establish as necessary.

@@ -8,7 +8,7 @@
 }
 ```
 
-The [part](../.././../schema/worker-hooks-oncomplete.schema.json) hook identifies if there are multiple tasks running in parrallel that must be completed before continuing. Having a `part` hook decorator will block the [oncomplete](./oncomplete.md) hook until all the parts are complete. The `part_queue` should be unique as to not conflict with other routes in the exchange. Example: `part.<svc>-<method>-<id>`
+The [part](../../schema/worker-hooks-oncomplete.schema.json) hook identifies if there are multiple tasks running in parrallel that must be completed before continuing. Having a `part` hook decorator will block the [oncomplete](./oncomplete.md) hook until all the parts are complete. The `part_queue` should be unique as to not conflict with other routes in the exchange. Example: `part.<svc>-<method>-<id>`
 
 **Note:** The maximum length of a queue in AMQP is usually 255 bytes.
 
