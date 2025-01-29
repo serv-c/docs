@@ -10,6 +10,59 @@ from tests import get_message_body, get_route_message, simple_start
 from tests.launch import is_running, stop
 
 
+class TestExitOn5xx(unittest.TestCase):
+    def test_server_error(self):
+        response = requests.post(
+            f"http://localhost:{self.port}",
+            json={
+                "type": "input",
+                "route": self.route,
+                "force": True,
+                "argument": {
+                    "method": "fail",
+                    "inputs": ["a", "b", 1],
+                },
+            },
+            timeout=2.5,
+        )
+        self.assertEqual(response.status_code, 200)
+        id = response.text
+        time.sleep(10)
+
+        response = requests.get(f"http://localhost:{self.port}/id/{id}", timeout=2.5)
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(response.json())
+
+    @classmethod
+    def tearDownClass(cls):
+        stop(cls.container)
+
+        channel = cls.conn.channel()
+        channel.queue_delete(queue=cls.route)
+        channel.queue_delete(queue=cls.sendroute)
+        channel.close()
+        cls.conn.close()
+
+    @classmethod
+    def setUpClass(cls):
+        cls.route = str(uuid.uuid4())
+        cls.sendroute = str(uuid.uuid4())
+        cls.port = 3000
+        cls.instanceid = str(uuid.uuid4())
+        cls.event = "my-event"
+        cls.env = {
+            "EVENT": cls.event,
+            "SEND_ROUTE": cls.sendroute,
+            "CONF__BUS__ROUTE": cls.route,
+            "CONF__HTTP__PORT": cls.port,
+            "CONF__INSTANCEID": cls.instanceid,
+        }
+        cls.container = simple_start(cls.env)
+
+        params = pika.URLParameters(os.environ["BUS_URL"])
+        cls.conn = pika.BlockingConnection(params)
+
+
 class TestSimpleMethod(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -24,6 +77,7 @@ class TestSimpleMethod(unittest.TestCase):
             "CONF__BUS__ROUTE": cls.route,
             "CONF__HTTP__PORT": cls.port,
             "CONF__INSTANCEID": cls.instanceid,
+            "CONF__WORKER__EXITON5XX": "false",
         }
         cls.container = simple_start(cls.env)
 
