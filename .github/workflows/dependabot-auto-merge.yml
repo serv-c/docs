@@ -2,6 +2,8 @@ jobs:
   dependabot:
     if: github.event.pull_request.user.login == 'dependabot[bot]'
     name: dependabot
+    runs-on:
+    - ubuntu-latest
     steps:
     - env:
         GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -11,6 +13,8 @@ jobs:
   devopsbot:
     if: github.event.pull_request.title == 'devopsbot update'
     name: devopsbot
+    runs-on:
+    - ubuntu-latest
     steps:
     - env:
         GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -20,6 +24,8 @@ jobs:
   rennovatebot:
     if: github.event.pull_request.user.login == 'renovate_bot'
     name: rennovatebot
+    runs-on:
+    - ubuntu-latest
     steps:
     - env:
         GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
