@@ -1,0 +1,30 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://docs.servc.io/schema/argument.schema.json",
+    "title": "Identification",
+    "description": "The response for the microservice to identify itself",
+    "type": "object",
+    "properties": {
+      "instanceId": {
+        "type": "string",
+        "description": "The instance id of the microservice"
+      },
+      "queue": {
+        "type": "string",
+        "description": "The queue name of the microservice"
+      },
+      "prefix": {
+        "type": "string",
+        "description": "The prefix used in the queue name and sending messages on the bus"
+      },
+      "methods": {
+        "type": "array",
+        "description": "The methods that the microservice can handle",
+        "items": {
+          "$ref": "https://docs.servc.io/schema/argument.schema.json"
+        }
+      }
+    },
+    "required": [ "instanceId", "queue", "prefix", "methods" ]
+  }
+  

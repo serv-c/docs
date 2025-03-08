@@ -1,0 +1,41 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://docs.servc.io/schema/middleware-bus-inputhandler.schema.json",
+    "title": "Middleware Bus Input Handler",
+    "description": "The method to handle the input recieved",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "The id of the job"
+      },
+      "argument": {
+        "$ref": "https://docs.servc.io/schema/argument.schema.json"
+      },
+      "context": {
+        "type": "object",
+        "properties": {
+          "bus": {
+            "$ref": "https://docs.servc.io/schema/middleware.schema.json"
+          },
+          "cache": {
+            "$ref": "https://docs.servc.io/schema/middleware.schema.json"
+          },
+          "middlewares": {
+            "type": "array",
+            "description": "Other middlewares to be used if needed",
+            "items": {
+              "$ref": "https://docs.servc.io/schema/middleware.schema.json"
+            }
+          },
+          "config": {
+            "type": "object",
+            "description": "the key value config object"
+          },
+          "required": ["bus", "cache", "middlewares", "config"]
+        }
+      }
+    },
+    "required": [ "id", "argument", "context" ]
+  }
+  

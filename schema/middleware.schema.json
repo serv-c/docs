@@ -1,0 +1,23 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://docs.servc.io/schema/middleware.schema.json",
+    "title": "Middleware Class Definition",
+    "description": "The class definition of middleware",
+    "type": "object",
+    "properties": {
+      "isOpen": {
+        "type": "boolean",
+        "description": "is the connection to the middleware open"
+      },
+      "connect": {
+        "type": "object",
+        "description": "The function to connect to the middleware"
+      },
+      "close": {
+        "type": "object",
+        "description": "The function to close the connection to the middleware"
+      }
+    },
+    "required": [ "isOpen", "connect", "close" ]
+  }
+  

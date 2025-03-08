@@ -1,0 +1,11 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://docs.servc.io/schema/worker-hooks-oncomplete.schema.json",
+    "title": "Hook OnComplete Schema",
+    "description": "Description of what to do after a job is completed",
+    "type": "array",
+    "items": {
+        "type": "object"
+    }
+}
+  

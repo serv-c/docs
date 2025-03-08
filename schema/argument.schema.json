@@ -1,0 +1,28 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://docs.servc.io/schema/argument.schema.json",
+    "title": "ArgumentObject",
+    "description": "The arguments to pass into a microservice",
+    "type": "object",
+    "properties": {
+      "method": {
+        "description": "The method to call",
+        "type": "string"
+      },
+      "inputs": {
+        "description": "The inputs to pass into the method",
+        "type": "any"
+      },
+      "hooks": {
+        "description": "Hooks to modify the execution flow of a method",
+        "type": "object",
+        "properties": {
+          "oncomplete": {
+            "$ref": "https://docs.servc.io/schema/worker-hooks-oncomplete.schema.json"
+          }
+        }
+      }
+    },
+    "required": [ "method", "inputs" ]
+  }
+  
