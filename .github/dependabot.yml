@@ -3,14 +3,12 @@ updates:
     prefix: fix
   directory: /
   package-ecosystem: pip
-  reviewers: []
   schedule:
     interval: daily
 - commit-message:
     prefix: fix
   directory: /
   package-ecosystem: github-actions
-  reviewers: []
   schedule:
     interval: daily
 version: 2
