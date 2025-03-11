@@ -16,6 +16,11 @@ jobs:
     runs-on:
     - ubuntu-latest
     steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: true
+        submodules: true
     - name: Setup GitHub CLI
       uses: ksivamuthu/actions-setup-gh-cli@v3
     - env:
@@ -29,6 +34,11 @@ jobs:
     runs-on:
     - ubuntu-latest
     steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: true
+        submodules: true
     - name: Setup GitHub CLI
       uses: ksivamuthu/actions-setup-gh-cli@v3
     - env:
