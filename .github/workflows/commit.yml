@@ -11,7 +11,7 @@ jobs:
         submodules: true
     - uses: actions/setup-node@v4
       with:
-        node-version: 23.9
+        node-version: 23.1
     - name: Install commitlint
       run: |
         if [ -f package.json ]; then
