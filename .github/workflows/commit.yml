@@ -30,5 +30,4 @@ jobs:
 name: COMMIT LINT
 'on':
   pull_request: {}
-  push: {}
 run-name: COMMIT LINT
