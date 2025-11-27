@@ -1,0 +1,35 @@
+jobs:
+  changelog:
+    name: changelog
+    runs-on:
+    - ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+        fetch-tags: true
+        submodules: true
+    - id: previoustag
+      name: Get Latest Tag
+      run: |-
+        echo ::set-output name=tag::$(git describe --tags "$(git rev-list --tags --max-count=1)")
+        echo $(git describe --tags "$(git rev-list --tags --max-count=1)")
+    - id: changelog
+      if: github.ref_name == 'main'
+      name: Generate new Tag
+      uses: TriPSs/conventional-changelog-action@v6
+      with:
+        fallback-version: ${{ steps.previoustag.outputs.tag }}
+        git-url: ${{ github.server_url != 'https://github.com' && 'git.yusufali.ca' || 'github.com' }}
+        github-token: ${{ github.token }}
+        output-file: false
+        skip-ci: false
+        skip-commit: true
+        skip-version-file: true
+        tag-prefix: ''
+name: CHANGELOG
+'on':
+  workflow_dispatch: {}
+permissions:
+  contents: write
+run-name: CHANGELOG
