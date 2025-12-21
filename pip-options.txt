@@ -1,0 +1,4 @@
+--index-url https://bandersnatch.yusufali.ca/simple/
+--extra-index-url https://pypi.yusufali.ca/simple/
+--trusted-host bandersnatch.yusufali.ca
+--trusted-host pypi.yusufali.ca
