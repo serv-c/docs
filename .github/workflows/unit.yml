@@ -1,0 +1,34 @@
+jobs:
+  unittest:
+    runs-on:
+    - ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        submodules: true
+    - uses: actions/setup-python@v5
+      with:
+        python-version: 3.13
+    - env:
+        EXTRA_MODULES: ''
+      name: Install pip dependencies
+      run: |-
+        if [ -n "$EXTRA_MODULES" ]; then
+            pip install $EXTRA_MODULES
+        fi
+        if [ ! -f pip-options.txt ]; then
+            touch pip-options.txt
+        fi
+
+        pip install -r requirements.txt -r pip-options.txt
+        pip install -r requirements-dev.txt -r pip-options.txt || true
+    - name: Type Check
+      run: mypy *.py --check-untyped-defs
+    - name: Run Tests
+      run: |2-
+
+        coverage run -m unittest tests/*.py
+        coverage report -m --fail-under=70
+name: Unit Test
+'on':
+  pull_request: {}

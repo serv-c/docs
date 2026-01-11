@@ -6,22 +6,27 @@ jobs:
     steps:
     - uses: actions/checkout@v6
       with:
-        fetch-depth: 0
-        fetch-tags: true
         submodules: true
+        token: ${{ secrets.PAT_TOKEN }}
     - id: previoustag
       name: Get Latest Tag
-      run: |-
-        echo ::set-output name=tag::$(git describe --tags "$(git rev-list --tags --max-count=1)")
-        echo $(git describe --tags "$(git rev-list --tags --max-count=1)")
+      run: |
+        git fetch --tags
+        last_tag_wprefix=$(git tag --list  --sort=-v:refname | head -n 1)
+        last_tag=$last_tag_wprefix
+        echo $last_tag_wprefix
+        echo $last_tag
+
+        echo last_tag=$last_tag >> $GITHUB_ENV
     - id: changelog
       if: github.ref_name == 'main'
       name: Generate new Tag
       uses: TriPSs/conventional-changelog-action@v6
       with:
-        fallback-version: ${{ steps.previoustag.outputs.tag }}
+        fallback-version: ${{ env.last_tag }}
+        git-path: ''
         git-url: ${{ github.server_url != 'https://github.com' && 'git.yusufali.ca' || 'github.com' }}
-        github-token: ${{ github.token }}
+        github-token: ${{ secrets.PAT_TOKEN }}
         output-file: false
         skip-ci: false
         skip-commit: true
