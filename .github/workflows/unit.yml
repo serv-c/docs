@@ -25,8 +25,7 @@ jobs:
     - name: Type Check
       run: mypy *.py --check-untyped-defs
     - name: Run Tests
-      run: |2-
-
+      run: |-
         coverage run -m unittest tests/*.py
         coverage report -m --fail-under=70
 name: Unit Test
