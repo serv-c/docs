@@ -16,6 +16,9 @@ jobs:
         if [ -n "$EXTRA_MODULES" ]; then
             pip install $EXTRA_MODULES
         fi
+        if [ -f ../pip-options.txt ]; then
+            cp ../pip-options.txt .
+        fi
         if [ ! -f pip-options.txt ]; then
             touch pip-options.txt
         fi
