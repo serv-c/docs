@@ -40,7 +40,7 @@ jobs:
 
       - name: "Get Previous tag"
         id: previoustagold
-        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        uses: "WyriHaximus/github-action-get-previous-tag@v2"
 
       - name: Conventional Changelog Action
         id: changelog
@@ -60,7 +60,7 @@ jobs:
       - name: "Get New tag"
         id: newtag
         if: github.ref_name == 'main'
-        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        uses: "WyriHaximus/github-action-get-previous-tag@v2"
 
       - name: Create Version Badge
         uses: RubbaBoy/BYOB@v1.3.0
